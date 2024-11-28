@@ -1,7 +1,7 @@
 /*--
 The MIT License (MIT)
 
-Copyright (c) 2010-2013 De Giuli Informática Ltda. (http://www.degiuli.com.br)
+Copyright (c) 2010-2019 De Giuli Informática Ltda. (http://www.degiuli.com.br)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -2327,6 +2327,41 @@ static WMICLASS wmiClasses[] = {
 "Win32_WMISetting", "MaxWaitOnEvents",
 "Win32_WMISetting", "MofSelfInstallDirectory",
 "Win32_WMISetting", "SettingID",
+
+//WMI Class         Class Property
+"Win32_PrinterConfiguration", "Caption",
+"Win32_PrinterConfiguration", "Description",
+"Win32_PrinterConfiguration", "SettingID",
+"Win32_PrinterConfiguration", "BitsPerPel",
+"Win32_PrinterConfiguration", "Collate",
+"Win32_PrinterConfiguration", "Color",
+"Win32_PrinterConfiguration", "Copies",
+"Win32_PrinterConfiguration", "DeviceName",
+"Win32_PrinterConfiguration", "DisplayFlags",
+"Win32_PrinterConfiguration", "DisplayFrequency",
+"Win32_PrinterConfiguration", "DitherType",
+"Win32_PrinterConfiguration", "DriverVersion",
+"Win32_PrinterConfiguration", "Duplex",
+"Win32_PrinterConfiguration", "FormName",
+"Win32_PrinterConfiguration", "HorizontalResolution",
+"Win32_PrinterConfiguration", "ICMIntent",
+"Win32_PrinterConfiguration", "ICMMethod",
+"Win32_PrinterConfiguration", "LogPixels",
+"Win32_PrinterConfiguration", "MediaType",
+"Win32_PrinterConfiguration", "Name",
+"Win32_PrinterConfiguration", "Orientation",
+"Win32_PrinterConfiguration", "PaperLength",
+"Win32_PrinterConfiguration", "PaperSize",
+"Win32_PrinterConfiguration", "PaperWidth",
+"Win32_PrinterConfiguration", "PelsHeight",
+"Win32_PrinterConfiguration", "PelsWidth",
+"Win32_PrinterConfiguration", "PrintQuality",
+"Win32_PrinterConfiguration", "Scale",
+"Win32_PrinterConfiguration", "SpecificationVersion",
+"Win32_PrinterConfiguration", "TTOption",
+"Win32_PrinterConfiguration", "VerticalResolution",
+"Win32_PrinterConfiguration", "XResolution",
+"Win32_PrinterConfiguration", "YResolution",
 
 /*
 * System Volumes

@@ -1,7 +1,7 @@
 /*--
 The MIT License (MIT)
 
-Copyright (c) 2010-2013 De Giuli Informática Ltda. (http://www.degiuli.com.br)
+Copyright (c) 2010-2019 De Giuli Informática Ltda. (http://www.degiuli.com.br)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -88,7 +88,7 @@ protected:
     int NestedLevel;
     CHAR buf[512];
 
-    vector<string> usbDevDetails;
+    std::vector<std::string> usbDevDetails;
 
     CMGETPARENT lpfnCM_Get_Parent;
     CMGETSIBLING lpfnCM_Get_Sibling;
@@ -124,9 +124,16 @@ protected:
     VOID StringDescriptor(UCHAR Index,PSTRING_DESCRIPTOR_NODE StringDescs);
     VOID UnknownDescriptor(PUSB_COMMON_DESCRIPTOR CommonDesc);
 
-    void PushBackDetails(string detail) {
-        Log(LOG_DEBUG,__LINE__,"-- USB.PushBackDets, %s",detail.c_str());
-        usbDevDetails.push_back(detail);
+    void PushBackDetails(const char*format, ...)
+    {
+        char buffer[2048] = { 0 };
+        va_list argptr;
+        va_start(argptr, format);
+        _vsnprintf(buffer, sizeof(buffer) - 1, format, argptr);
+        va_end(argptr);
+
+        Log(LOG_DEBUG,__LINE__,"-- USB.PushBackDets, %s", buffer);
+        usbDevDetails.push_back(buffer);
     }
 
 public:
@@ -134,45 +141,39 @@ public:
         wPortsNumber(0),
         ulTotalDevicesConnected(0),
         NestedLevel(0),
-        lpfnCM_Get_Parent(NULL),
-        lpfnCM_Get_Sibling(NULL),
-        lpfnCM_Get_Child(NULL),
-        lpfnCM_Get_DevNode_Registry_PropertyA(NULL),
-        lpfnCM_Locate_DevNodeA(NULL)
+        lpfnCM_Get_Parent(nullptr),
+        lpfnCM_Get_Sibling(nullptr),
+        lpfnCM_Get_Child(nullptr),
+        lpfnCM_Get_DevNode_Registry_PropertyA(nullptr),
+        lpfnCM_Locate_DevNodeA(nullptr)
     {
         memset(buf,0x00,sizeof(buf));
         usbDevDetails.clear();
     };
+
     ~USB()
     {
         usbDevDetails.clear();
     };
 
+    USB(const USB& usb) = delete;
+    USB& USB::operator=(const USB& usb) = delete;
+    USB(const USB&& usb) = delete;
+    USB&& USB::operator=(const USB&& usb) = delete;
+
     void EnumerateUSB();
     void USBDevicesDetails();
 
-    static PSTR GetVendorString(USHORT idVendor)
+    static std::string GetVendorString(uint64_t const idVendor)
     {
-        PUSBVENDORID vendorID;
-
         if (idVendor != 0x0000)
         {
-            vendorID = USBVendorIDs;
-            while (vendorID->usVendorID != 0x0000)
-            {
-                if (vendorID->usVendorID == idVendor)
-                {
-                    return (vendorID->szVendor);
-                }
-                vendorID++;
-            }
+            auto const usbit = usbNames.find(idVendor);
+            if (usbit != usbNames.cend())
+                return usbit->second;
         }
-        return NULL;
+        return "";
     }
-
-private:
-    USB(const USB &usb);
-    USB &USB::operator=(const USB &usb);
 };
 
 #endif  //_USB_INCLUDE_

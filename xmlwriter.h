@@ -1,7 +1,7 @@
 /*--
 The MIT License (MIT)
 
-Copyright (c) 2010-2013 De Giuli Informática Ltda. (http://www.degiuli.com.br)
+Copyright (c) 2010-2019 De Giuli Informática Ltda. (http://www.degiuli.com.br)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -55,33 +55,38 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 #include <stack>
-using namespace std;
-typedef stack<string> StackStrings;
+
+typedef std::stack<std::string> StackStrings;
 
 typedef void (*DebugMsg)(char *message,int typeDebug);
 
-class xmlwriter{
+class xmlwriter {
 public:
-	xmlwriter(string sTmp,DebugMsg dbg);
-	~xmlwriter();
-	void CreateChild(string sTag,string sValue);
-	void Createtag(string sTag);
-	void CloseLasttag();
-	void CloseAlltags();
-	void AddAtributes(string sAttrName, string sAttrvalue);
-	void AddComment(string sComment);
+    xmlwriter(const xmlwriter& other) = delete;
+    xmlwriter& xmlwriter::operator=(const xmlwriter& other) = delete;
+    xmlwriter(const xmlwriter&& other) = delete;
+    xmlwriter&& xmlwriter::operator=(const xmlwriter&& other) = delete;
+
+    xmlwriter(std::string const& sTmp, DebugMsg dbg);
+    ~xmlwriter();
+    void CreateChild(std::string const& sTag, std::string const& sValue);
+    void Createtag(std::string const& sTag);
+    void CloseLasttag();
+    void CloseAlltags();
+    void AddAtributes(std::string const& sAttrName, std::string const& sAttrvalue);
+    void AddComment(std::string const& sComment);
 private:
-	string sXmlFile;
-	vector<string> vectAttrData;
-	FILE *fp;
-	int iLevel;
-	StackStrings sTagStack;
+    std::string sXmlFile;
+    std::vector<std::string> vectAttrData;
+    FILE *fp;
+    int iLevel;
+    StackStrings sTagStack;
 
     DebugMsg pDebug;
 
-    string validateTagName(string sTmp);
-    string validateValue(string sTmp);
-    void Write(int id,const char*format,...);
+    std::string validateTagName(std::string const& sTmp);
+    std::string validateValue(std::string const& sTmp);
+    void Write(int id, const char*format, ...);
 };
 
 #endif // xmlwriter_h

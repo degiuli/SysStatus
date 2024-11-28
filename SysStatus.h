@@ -1,7 +1,7 @@
 /*--
 The MIT License (MIT)
 
-Copyright (c) 2010-2013 De Giuli Informática Ltda. (http://www.degiuli.com.br)
+Copyright (c) 2010-2019 De Giuli Informática Ltda. (http://www.degiuli.com.br)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -27,12 +27,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define _SYS_STATUS_INCLUDE_
 
 //WMI DBG - Use only for test
-//#define _GET_WMI_USBINFO            //USB information also retrived by EnumerateUSB function
-//#define _GET_WMI_LOGICALDISK        //Logical Disk information also retrieved by LogicalDrives function
-//#define _GET_WMI_PRINTER            //Printer information also retrived by PrinterInfo function
+#ifdef _DEBUG
+#define _GET_WMI_USBINFO            //USB information also retrieved by EnumerateUSB function
+#define _GET_WMI_LOGICALDISK        //Logical Disk information also retrieved by LogicalDrives function
+//#define _GET_WMI_PRINTER            //Printer information also retrieved by PrinterInfo function
 //#define _GET_WMI_ACCOUNTS           //All user and groups which includes the full domain - which can be thousands and depending on the system can spend 'years' to be processed
 //#define _GET_WMI_COMCLASS           //All COM class - which can be thousands - which can be thousands and depending on the system can spend 'years' to be processed
 //#define _GET_WMI_SOFTWARE_DETAILS   //All software element, part of a software feature - which can be thousands and depending on the system can spend 'years' to be processed
+#endif
 
 //sizes definiitions
 #define KBYTES              (1024)
@@ -61,7 +63,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define MINOR_VERSION(ver)  (DWORD)(HIBYTE(LOWORD(ver)))
 #define BUILD_VERSION(ver)  (ver<0x80000000?(DWORD)(HIWORD(ver)):0)
 
-#define TERMINATE_DLL_MSG   (WM_USER+1000)
+#define TERMINATE_WINDOW_MSG   (WM_USER+1000)
 
 //logical processor information API functions
 typedef BOOL (WINAPI *LPFN_GLPI)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,PDWORD);
@@ -83,19 +85,16 @@ int _thGetInt(int *piProtectedVar);
 void DebugStringToFile(char *message,int typeDebug);
 void Log(int type,int id,const char*format,...);
 void CheckLogFileSize(DWORD dwMaxSize);
-char * GetLastErrorMessage(DWORD dwLastError, char * lpBuffer, DWORD nSize);
-LPSTR GUID2Str(LPGUID lpGuid, LPSTR lpStr);
-vector<string> parseNullTerminatedStrings(char* input);
 PCHAR WideStrToMultiStr(PWCHAR WideStr);
-void CalcElapsedTime(unsigned __int64 tickStart,unsigned __int64 &tickEnd,float &timeElapsed,unsigned long &seconds);
-void LogElapsedTime(unsigned long line,unsigned __int64 tickStart,char *lpszAdditionalMsg = NULL);
+void LogElapsedTime(unsigned long const line, uint64_t const tickStart, char const* lpszAdditionalMsg = nullptr);
+void CalcElapsedTime(uint64_t const tickStart, uint64_t& tickEnd, double& timeElapsed, uint64_t& seconds);
 void USBTraceInfo(PCHAR StartString, PCHAR DeviceInterfaceName);
 DWORD GetWinVer();
 
 /*
 ** Running Thread
 */
-bool StartThread(string threadName,unsigned (__stdcall *threadFunction)(void*),void *threadData,DWORD threadTimeout,HANDLE *pthreadHandle = NULL);
+bool StartThread(std::string const& threadName, unsigned(__stdcall *threadFunction)(void*), void *threadData, DWORD threadTimeout, HANDLE *pthreadHandle = nullptr);
 
 /*
 ** PBuffer: Memory simple class
@@ -103,13 +102,13 @@ bool StartThread(string threadName,unsigned (__stdcall *threadFunction)(void*),v
 class PBuffer
 {
 private:
-    BYTE *pMem;
-    int lMem;
+    byte* pMem;
+    size_t lMem;
 
 public:
     PBuffer()
     {
-        pMem = NULL;
+        pMem = nullptr;
         lMem = 0;
     };
     ~PBuffer()
@@ -117,58 +116,59 @@ public:
         _clear();
     };
 
-    BYTE *_allocMem(int len)
-    {
-        if(len > lMem)
-        {
-            if(pMem)
-                delete [] pMem;
-            lMem = len;
-            pMem = new BYTE[lMem];
-            memset(pMem,0x00,lMem);
-        }
-        return pMem;
-    };
+    PBuffer(const PBuffer& p) = delete;
+    PBuffer& PBuffer::operator=(const PBuffer& p) = delete;
+    PBuffer(const PBuffer&& p) = delete;
+    PBuffer&& PBuffer::operator=(PBuffer&& p) = delete;
 
-    BYTE *_allocMem(int len,BYTE *mem)
+    byte* _allocMem(size_t len)
     {
         if (len > lMem)
         {
             if (pMem)
-                delete [] pMem;
+                delete[] pMem;
             lMem = len;
-            pMem = new BYTE[lMem];
-            memset(pMem,0x00,lMem);
-            
-            //copy new data
-            memcpy(pMem,mem,lMem);
+            pMem = new byte[lMem];
+            memset(pMem, 0x00, lMem);
         }
         return pMem;
     };
 
-    int _sizeofMem()
+    byte* _allocMem(size_t len, byte* mem)
+    {
+        if (len > lMem)
+        {
+            if (pMem)
+                delete[] pMem;
+            lMem = len;
+            pMem = new BYTE[lMem];
+            memset(pMem, 0x00, lMem);
+
+            //copy new data
+            memcpy(pMem, mem, lMem);
+        }
+        return pMem;
+    };
+
+    size_t _sizeofMem()
     {
         return lMem;
     };
 
-    BYTE *_getMem()
+    byte* _getMem()
     {
         return pMem;
     };
 
     void _clear()
     {
-        if(pMem)
+        if (pMem)
         {
-            delete [] pMem;
-            pMem = NULL;
+            delete[] pMem;
+            pMem = nullptr;
         }
         lMem = 0;
     }
-
-private:
-             PBuffer(const PBuffer &p);
-    PBuffer &PBuffer::operator=(const PBuffer &p);
 };
 
 #endif  //_SYS_STATUS_INCLUDE_

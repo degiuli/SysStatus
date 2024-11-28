@@ -7050,7 +7050,7 @@ $LN44@StringDesc@2:
 ; 2084 :             // Use the * precision and pass the number of characters just caculated.
 ; 2085 :             // bString is always WCHAR so specify widestring regardless of what TCHAR resolves to
 ; 2086 :             // 
-; 2087 :             _snprintf(format,sizeof(format)-1,">   0x%04X: %s",StringDescs->LanguageID,(const char *)StringDescs->StringDescriptor->bString);
+; 2087 :             _snprintf(format,sizeof(format)-1,">   0x%04X: %s",StringDescs->LanguageID,(char const* )StringDescs->StringDescriptor->bString);
 
   00097	0f b7 4e 06	 movzx	 ecx, WORD PTR [esi+6]
   0009b	8d 46 0a	 lea	 eax, DWORD PTR [esi+10]
@@ -12414,7 +12414,7 @@ $LN103@EnumerateH:
 ; 901  :                         _snprintf(deviceInfo,sizeof(deviceInfo)-1,"%s [VID:%.4X PID:%.4X SN:%s Spd: %s]",deviceDesc,
 ; 902  :                                         info->ConnectionInfo->DeviceDescriptor.idVendor,
 ; 903  :                                         info->ConnectionInfo->DeviceDescriptor.idProduct,
-; 904  :                                         (const char *)pDescNode->StringDescriptor->bString,deviceSpeed);
+; 904  :                                         (char const* )pDescNode->StringDescriptor->bString,deviceSpeed);
 
   00429	0f b7 55 0e	 movzx	 edx, WORD PTR [ebp+14]
   0042d	8d 4c 24 34	 lea	 ecx, DWORD PTR _deviceSpeed$[esp+1592]

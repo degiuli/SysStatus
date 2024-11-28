@@ -56,7 +56,4 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //#include <atlsafe.h>
 
 //System tick cound
-unsigned __int64 SysTick();
-
-//STD
-using namespace std;
+uint64_t SysTick();

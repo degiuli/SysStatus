@@ -1,7 +1,7 @@
 /*--
 The MIT License (MIT)
 
-Copyright (c) 2010-2013 De Giuli Informática Ltda. (http://www.degiuli.com.br)
+Copyright (c) 2010-2019 De Giuli Informática Ltda. (http://www.degiuli.com.br)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -25,153 +25,160 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
 #include "xmlwriter.h"
-#include <stdarg.h>
 
-xmlwriter::xmlwriter(string sTmp,DebugMsg dbg)
+#include <cstdarg>
+#include <memory>
+
+xmlwriter::xmlwriter(std::string const& sTmp, DebugMsg dbg) : sXmlFile(sTmp), pDebug(dbg), iLevel(0)
 {
-    pDebug = dbg;
-
-    sXmlFile = sTmp;
-    fp = NULL;
     iLevel = 0;
-    fp = fopen(sXmlFile.c_str(),"w");
-    if(fp == NULL)
+    fp = fopen(sXmlFile.c_str(), "w");
+    if (fp == nullptr)
     {
-		Write(__LINE__,"Unable to open output file");
-		return;
-  	}
-	else
-	{
-		Write(__LINE__,"<?xml version=\"1.0\" encoding=\"UTF-8\"\?>");
-	}
+        Write(__LINE__, "Unable to open output file");
+        return;
+    }
+    else
+    {
+        Write(__LINE__, "<?xml version=\"1.0\" encoding=\"UTF-8\"\?>");
+    }
 }
 
 xmlwriter::~xmlwriter()
 {
-    if(fp != NULL)
+    if (fp != NULL)
         fclose(fp);
     vectAttrData.clear();
 }
 
-void xmlwriter::Createtag(string sTag)
+void xmlwriter::Createtag(std::string const& sTag)
 {
-    string tag = validateTagName(sTag);
+    std::string tag = validateTagName(sTag);
 
-	Write(__LINE__,"\n");
-	//Indent properly
-	for(int iTmp =0;iTmp<iLevel;iTmp++)
-		Write(__LINE__,"\t");
-	Write(__LINE__,"<%s",tag.c_str());
-	//Add Attributes
-	while(0 < vectAttrData.size()/2)
-	{
-		string sTmp = vectAttrData.back();
-		Write(__LINE__," %s=", sTmp.c_str());
-		vectAttrData.pop_back();
-		sTmp = vectAttrData.back();
-		Write(__LINE__,"\"%s\"", sTmp.c_str());
-		vectAttrData.pop_back();
-	}
-	vectAttrData.clear();
-	Write(__LINE__,">");
-	sTagStack.push(tag);
-	iLevel++;
+    Write(__LINE__, "\n");
 
+    //Indent properly
+    for (int iTmp = 0; iTmp < iLevel; iTmp++)
+        Write(__LINE__, "\t");
+
+    Write(__LINE__, "<%s", tag.c_str());
+
+    //Add Attributes
+    while (0 < vectAttrData.size() / 2)
+    {
+        std::string sTmp = vectAttrData.back();
+        Write(__LINE__, " %s=", sTmp.c_str());
+        vectAttrData.pop_back();
+        sTmp = vectAttrData.back();
+        Write(__LINE__, "\"%s\"", sTmp.c_str());
+        vectAttrData.pop_back();
+    }
+
+    vectAttrData.clear();
+    Write(__LINE__, ">");
+    sTagStack.push(tag);
+    iLevel++;
 }
 
 void xmlwriter::CloseLasttag()
 {
-	Write(__LINE__,"\n");
-	iLevel--;
+    Write(__LINE__, "\n");
+    iLevel--;
+
     //Indent properly
-	for(int iTmp =0;iTmp<iLevel;iTmp++)
-		Write(__LINE__,"\t");
-	Write(__LINE__,"</%s>",sTagStack.top().c_str());
-	sTagStack.pop();//pop out the last tag
-	return;
+    for (int iTmp = 0; iTmp < iLevel; iTmp++)
+        Write(__LINE__, "\t");
+
+    Write(__LINE__, "</%s>", sTagStack.top().c_str());
+    sTagStack.pop();//pop out the last tag
+    return;
 }
 
 void xmlwriter::CloseAlltags()
 {
-	while(sTagStack.size() != 0)
-	{
-	   Write(__LINE__,"\n");
-	   iLevel--;
+    while (sTagStack.size() != 0)
+    {
+        Write(__LINE__, "\n");
+        iLevel--;
+
         //Indent properly
-	   for(int iTmp =0;iTmp<iLevel;iTmp++)
-	       Write(__LINE__,"\t");
-	   Write(__LINE__,"</%s>",sTagStack.top().c_str());
-	   sTagStack.pop();//pop out the last tag
+        for (int iTmp = 0; iTmp < iLevel; iTmp++)
+            Write(__LINE__, "\t");
+
+        Write(__LINE__, "</%s>", sTagStack.top().c_str());
+        sTagStack.pop();//pop out the last tag
     }
-	return;
+    return;
 }
 
-void xmlwriter::CreateChild(string sTag,string sValue)
+void xmlwriter::CreateChild(std::string const& sTag, std::string const& sValue)
 {
-    string tag = validateTagName(sTag);
-    string value = validateValue(sValue);
+    std::string tag = validateTagName(sTag);
+    std::string value = validateValue(sValue);
 
-	Write(__LINE__,"\n");
-	//Indent properly
-	for(int iTmp =0;iTmp<iLevel;iTmp++)
-		Write(__LINE__,"\t");
-	Write(__LINE__,"<%s",tag.c_str());
-	//Add Attributes
-	while(0 < vectAttrData.size()/2)
-	{
-		string sTmp = vectAttrData.back();
-		Write(__LINE__," %s=", sTmp.c_str());
-		vectAttrData.pop_back();
-		sTmp = vectAttrData.back();
-		Write(__LINE__,"\"%s\"", sTmp.c_str());
-		vectAttrData.pop_back();
-	}
-	vectAttrData.clear();
-	//add value and close tag
-	Write(__LINE__,">%s</%s>",value.c_str(),tag.c_str());
+    Write(__LINE__, "\n");
+
+    //Indent properly
+    for (int iTmp = 0; iTmp < iLevel; iTmp++)
+        Write(__LINE__, "\t");
+
+    Write(__LINE__, "<%s", tag.c_str());
+
+    //Add Attributes
+    while (0 < vectAttrData.size() / 2)
+    {
+        std::string sTmp = vectAttrData.back();
+        Write(__LINE__, " %s=", sTmp.c_str());
+        vectAttrData.pop_back();
+        sTmp = vectAttrData.back();
+        Write(__LINE__, "\"%s\"", sTmp.c_str());
+        vectAttrData.pop_back();
+    }
+
+    vectAttrData.clear();
+
+    //add value and close tag
+    Write(__LINE__, ">%s</%s>", value.c_str(), tag.c_str());
 }
 
-void xmlwriter::AddAtributes(string sKey, string sVal)
+void xmlwriter::AddAtributes(std::string const& sKey, std::string const& sVal)
 {
-	vectAttrData.push_back(validateValue(sVal));
-	vectAttrData.push_back(validateTagName(sKey));
+    vectAttrData.push_back(validateValue(sVal));
+    vectAttrData.push_back(validateTagName(sKey));
 }
 
-void xmlwriter::AddComment(string sComment)
+void xmlwriter::AddComment(std::string const& sComment)
 {
-	Write(__LINE__,"\n");
-	//Indent properly
-	for(int iTmp =0;iTmp<iLevel;iTmp++)
-		Write(__LINE__,"\t");
-	Write(__LINE__,"<!-- %s -->",sComment.c_str());
+    Write(__LINE__, "\n");
+
+    //Indent properly
+    for (int iTmp = 0; iTmp < iLevel; iTmp++)
+        Write(__LINE__, "\t");
+
+    Write(__LINE__, "<!-- %s -->", sComment.c_str());
 }
 
-string xmlwriter::validateTagName(string sTmp)
+std::string xmlwriter::validateTagName(std::string const& sTemp)
 {
-    string temp;
-    char * str = new char[sTmp.size()+1];
-    memset(str,0x00,sizeof(char)*sTmp.size()+1);
-    strcpy(str,sTmp.c_str());
+    std::string temp;
 
     //first character must be a alphabetic one
-    //if(isalpha(str[0]))
-    if((str[0]>=0x41 && str[0]<=0x5A) ||
-       (str[0]>=0x61 && str[0]<=0x7A))
+    if ((sTemp[0] >= 0x41 && sTemp[0] <= 0x5A) ||
+        (sTemp[0] >= 0x61 && sTemp[0] <= 0x7A))
     {
-        temp.assign(sTmp);
+        temp.assign(sTemp);
     }
     else
     {
         temp.assign("a_");
-        temp.append(sTmp);
+        temp.append(sTemp);
     }
-    delete [] str;
     return validateValue(temp);
 }
 
-string xmlwriter::validateValue(string sTmp)
+std::string xmlwriter::validateValue(std::string const& sTmp)
 {
-    char validSpecChars[] = {
+    char const validSpecChars[] = {
         '!',    '@',    '#',    '$',    '%',
         '*',    '(',    ')',    '-',    '_',
         '/',    '|',    '\\',   '\"',   '\'',
@@ -180,48 +187,33 @@ string xmlwriter::validateValue(string sTmp)
         '?',    '^',    '~',    0x20,   0x00
     };
 
-    char * str = new char[sTmp.size()+1];
-    memset(str,0x00,sizeof(char)*sTmp.size()+1);
-    strcpy(str,sTmp.c_str());
+    size_t const newSize = (sTmp.size() * 5) + 1;
+    std::unique_ptr<char[]> newStr(new char[newSize]);
+    memset(&newStr[0], 0x00, sizeof(char) * newSize);
 
-    int newSize = sTmp.size()*5+1;
-    char * newStr = new char[newSize];
-    memset(newStr,0x00,sizeof(char)*newSize);
-
-    int i = 0, pos = 0;
-
-    while(str[i]!=NULL)
+    int pos = 0;
+    for(char const ch : sTmp)
     {
-        //if(isalnum(str[i]) || str[i]==0x20)
-        if((str[i]>=0x41 && str[i]<=0x5A) ||
-           (str[i]>=0x61 && str[i]<=0x7A) ||
-           (str[i]>=0x30 && str[i]<=0x39))
+        if ((ch >= 0x41 && ch <= 0x5A) ||
+            (ch >= 0x61 && ch <= 0x7A) ||
+            (ch >= 0x30 && ch <= 0x39))
         {
-            newStr[pos] = str[i];
+            newStr[pos] = ch;
             pos++;
         }
-        else if(str[i]=='&')
+        else if (ch == '&')
         {
-            pos += _snprintf(&newStr[pos],newSize-pos-1,"&amp;",str[i]);
+            pos += _snprintf(&newStr[pos], newSize - pos - 1, "&amp;"); // , ch);
         }
-        //else if(ispunct(str[i]) && str[i]!=0x60)
-        //{
-        //    newStr[pos] = str[i];
-        //    pos++;
-        //}
-        //else
-        //{
-        //    pos += _snprintf(&newStr[pos],newSize-pos-1,"&#%d;",str[i]);
-        //}
         else
         {
             int x = 0;
             bool found = false;
-            while(validSpecChars[x]!=0x00)
+            while (validSpecChars[x] != 0x00)
             {
-                if(str[i]==validSpecChars[x])
+                if (ch == validSpecChars[x])
                 {
-                    newStr[pos] = str[i];
+                    newStr[pos] = ch;
                     pos++;
                     found = true;
                     break;
@@ -229,41 +221,34 @@ string xmlwriter::validateValue(string sTmp)
                 x++;
             }
 
-            if(!found)
+            if (!found)
             {
-                pos += _snprintf(&newStr[pos],newSize-pos-1,"&#%d;",str[i]);
+                pos += _snprintf(&newStr[pos], newSize - pos - 1, "&#%d;", ch);
             }
         }
-        i++;
     }
 
-    string temp(newStr);
-
-    delete [] str;
-    delete [] newStr;
-
-    return temp;
+    return std::string(newStr.get());
 }
 
-void xmlwriter::Write(int id,const char*format,...)
+void xmlwriter::Write(int id, const char*format, ...)
 {
-    char message[3000] = {0};
-    char buffer[2048] = {0};
+    char buffer[2048] = { 0 };
     va_list	argptr;
 
     //Format the message to be logged
-    va_start(argptr,format);
-    if(fp)
+    va_start(argptr, format);
+    if (fp)
     {
-        vfprintf(fp,format,argptr);
+        vfprintf(fp, format, argptr);
     }
 
     //Write debug
-    _vsnprintf(buffer,sizeof(buffer)-1,format,argptr);
-    if(strlen(buffer)>2)    //do not write CR/LF
+    if (_vsnprintf(buffer, sizeof(buffer) - 1, format, argptr) > 2)    //do not write CR/LF
     {
-        _snprintf(message,sizeof(message),"TID %.5u ID %.5u -- XmlWritter: %s\r\n",GetCurrentThreadId(),id,buffer);
-        (*pDebug)(message,0/*LOG_NONE*/);
+        char message[3000] = { 0 };
+        _snprintf(message, sizeof(message), "TID %.5u ID %.5i -- XmlWritter: %s\r\n", GetCurrentThreadId(), id, buffer);
+        (*pDebug)(message, 0/*LOG_NONE*/);
     }
     va_end(argptr);
 }
